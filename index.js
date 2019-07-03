@@ -19,12 +19,18 @@ exports.handler = async (event) => {
             });
             return;
         }
-        s3.getObject({ Bucket, Key: obj.Key }, function (err, data) {
+        s3.getObject(objParams, function (err, data) {
             // Handle any error and exit
             if (err)
                 return err;
             // Convert Body from a Buffer to a String
-            let html = data.Body.toString('utf-8'); // Use the encoding necessary
+            const original = data.Body.toString('utf-8').replace(/\n/g, ' '); // Use the encoding necessary
+            const stylefree = original.replace(/<style>.*<\/style>/i, '');
+            console.log(stylefree)
+            // s3.putObject({ Body: stylefree, Bucket, Key: obj.Key, Tagging: "destyled=true" }, function (err, data) {
+            //     if (err) console.log(err, err.stack); // an error occurred
+            //     else console.log(data);           // successful response
+            // });
         });
 
         const path = obj.Key.slice(0, -5); // remove '.html'
@@ -70,3 +76,19 @@ exports.handler = async (event) => {
 // }
 
 // set lambda timeout to 1 minute
+
+
+// {
+//     "Version": "2012-10-17",
+//         "Statement": [
+//             {
+//                 "Sid": "VisualEditor0",
+//                 "Effect": "Allow",
+//                 "Action": [
+//                     "s3:PutObject",
+//                     "s3:PutObjectTagging"
+//                 ],
+//                 "Resource": "arn:aws:s3:::medium-html/"
+//             }
+//         ]
+// }
