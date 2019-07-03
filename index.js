@@ -26,12 +26,11 @@ exports.handler = async (event, context, callback) => {
             const article = await s3.getObject({ Bucket, Key: key }).promise();
             const original = article.Body.toString('utf-8');
 
-            // Transform the S3 object (customize based on your needs)
-            const stylefree = original.replace(/<style>.*<\/style>/is, '');
-            const logofree = stylefree.replace(/What did we miss.*footer>/is, '');
-
-            // Use the final result of your transformations as the putObject body
-            const Body = logofree;
+            // Customize the S3 object's text based on your needs
+            const Body = original
+                .replace(/<style>.*<\/style>/is, '')
+                .replace(/What did we miss.*footer>/is, '')
+                .replace(/>https.{33}polly.{82}</i, '>Listen to article as Audio by Amazon Polly<');
 
             // Populate metadata array
             const path = key.slice(0, -5);
