@@ -2,6 +2,7 @@ const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 const Bucket = 'medium-html';
 const listParams = { Bucket };
+var readline = require('readline');
 
 // this Lambda has full permissions for S3's medium-html (specify that in serverless.yml)
 // also backup daily to another bukect to which no one and no service has delete access
@@ -10,18 +11,31 @@ exports.handler = async (event) => {
     // list objects in medium-html bucket
     const response = await s3.listObjectsV2(listParams).promise();
     response.Contents.forEach(obj => {
+        const objParams = { Bucket, Key: obj.Key };
         if (obj.Size < 10000) {
-            const deleteParams = { Bucket, Key: obj.Key };
-            s3.deleteObject(deleteParams, (err, res) => {
+            console.log(`Deleting ${obj.Key}, with size of ${obj.Size}...`);
+            s3.deleteObject(objParams, (err, res) => {
                 console.log(err, res);
-            }); // S3 is eventually consistent...results may not be immediate.
+            });
+            return;
         }
-        console.log(obj);
+        s3.getObject({ Bucket, Key: obj.Key }, function (err, data) {
+            // Handle any error and exit
+            if (err)
+                return err;
+            // Convert Body from a Buffer to a String
+            let html = data.Body.toString('utf-8'); // Use the encoding necessary
+        });
+
         const path = obj.Key.slice(0, -5); // remove '.html'
         metaData.push({
             path,
         })
     });
+
+
+    // get title by finding `<h1 class="p-name">` and deleting everything between that and `</h1>`.
+
     console.log('printing all metadata:')
     console.log(metaData);
     // as you iterate through each object,
@@ -54,3 +68,5 @@ exports.handler = async (event) => {
 //             }
 //         ]
 // }
+
+// set lambda timeout to 1 minute
