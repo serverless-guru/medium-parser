@@ -34,7 +34,8 @@ exports.handler = async (event, context, callback) => {
 
             // Populate metadata array
             const path = key.slice(0, -5);
-            metadata.push({ path }); // push({ path, title, img, subtitle })
+            const title = original.match(/<h1 class="p-name">.{1,300}<\/h1>/)[0].slice(19, -5);
+            metadata.push({ path, title }); // push({ path, title, img, subtitle })
 
             // Update S3 with the changes
             await s3.putObject({ Bucket, Key: key, Body, ACL: 'public-read' }).promise();
