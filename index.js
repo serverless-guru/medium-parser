@@ -23,7 +23,12 @@ exports.handler = async (event, context, callback) => {
             // Get an S3 object
             const article = await s3.getObject({ Bucket, Key: key }).promise();
             const original = article.Body.toString('utf-8');
-            console.log(original)
+
+            // Transform the S3 object
+            const stylefree = original.replace(/<style>.*<\/style>/is, '');
+
+            // Update S3 with the changes
+            await s3.putObject({ Bucket, Key: key, Body: stylefree }).promise();
         }
 
         callback(null, 'Success!');
