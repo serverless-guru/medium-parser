@@ -2,48 +2,74 @@ const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 const Bucket = 'medium-html';
 const listParams = { Bucket };
-var readline = require('readline');
 
 // this Lambda has full permissions for S3's medium-html (specify that in serverless.yml)
 // also backup daily to another bukect to which no one and no service has delete access
-exports.handler = async (event) => {
+exports.handler = async (event, context, callback) => {
     const metaData = [];
-    // list objects in medium-html bucket
-    const response = await s3.listObjectsV2(listParams).promise();
-    response.Contents.forEach(obj => {
-        const objParams = { Bucket, Key: obj.Key };
-        if (obj.Size < 10000) {
-            console.log(`Deleting ${obj.Key}, with size of ${obj.Size}...`);
-            s3.deleteObject(objParams, (err, res) => {
-                console.log(err, res);
-            });
-            return;
-        }
-        s3.getObject(objParams, function (err, data) {
-            // Handle any error and exit
-            if (err)
-                return err;
-            // Convert Body from a Buffer to a String
-            const original = data.Body.toString('utf-8'); // Use the encoding necessary
-            const stylefree = original.replace(/<style>.*<\/style>/is, '');
-            console.log(stylefree)
-            // s3.putObject({ Body: stylefree, Bucket, Key: obj.Key, Tagging: "destyled=true" }, function (err, data) {
-            //     if (err) console.log(err, err.stack); // an error occurred
-            //     else console.log(data);           // successful response
-            // });
+
+    try {
+        // List objects in bucket
+        const s3Objects = await s3.listObjectsV2(listParams).promise();
+
+        // Get object keys
+        const objectKeys = [];
+        s3Objects.Contents.forEach(obj => {
+            objectKeys.push(obj.Key);
         });
 
-        const path = obj.Key.slice(0, -5); // remove '.html'
-        metaData.push({
-            path,
-        })
-    });
+        // Iterate through each object key
+        for (key of objectKeys) {
+            // Get an S3 object
+            const article = await s3.getObject({ Bucket, Key: key }).promise();
+            const original = article.Body.toString('utf-8');
+            console.log(original)
+        }
+
+        callback(null, 'Success!');
+    } catch (err) {
+        callback(err.message);
+    }
 
 
-    // get title by finding `<h1 class="p-name">` and deleting everything between that and `</h1>`.
 
-    console.log('printing all metadata:')
-    console.log(metaData);
+
+
+
+    // response.Contents.forEach(obj => {
+    //     const objParams = { Bucket, Key: obj.Key };
+    //     if (obj.Size < 10000) {
+    //         console.log(`Deleting ${obj.Key}, with size of ${obj.Size}...`);
+    //         s3.deleteObject(objParams, (err, res) => {
+    //             console.log(err, res);
+    //         });
+    //         return;
+    //     }
+    //     s3.getObject(objParams, function (err, data) {
+    //         // Handle any error and exit
+    //         if (err)
+    //             return err;
+    //         // Convert Body from a Buffer to a String
+    //         const original = data.Body.toString('utf-8'); // Use the encoding necessary
+    //         const stylefree = original.replace(/<style>.*<\/style>/is, '');
+    //         console.log(stylefree)
+    //         // s3.putObject({ Body: stylefree, Bucket, Key: obj.Key, Tagging: "destyled=true" }, function (err, data) {
+    //         //     if (err) console.log(err, err.stack); // an error occurred
+    //         //     else console.log(data);           // successful response
+    //         // });
+    //     });
+
+    //     const path = obj.Key.slice(0, -5); // remove '.html'
+    //     metaData.push({
+    //         path,
+    //     })
+    // });
+
+
+    // // get title by finding `<h1 class="p-name">` and deleting everything between that and `</h1>`.
+
+    // console.log('printing all metadata:')
+    // console.log(metaData);
     // as you iterate through each object,
     // push object meta-data to an array
     // copy entire object content to a temporary variable
@@ -92,3 +118,5 @@ exports.handler = async (event) => {
 //             }
 //         ]
 // }
+
+
