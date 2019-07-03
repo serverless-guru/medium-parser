@@ -6,16 +6,18 @@ const listParams = { Bucket };
 // this Lambda has full permissions for S3's medium-html (specify that in serverless.yml)
 // also backup daily to another bukect to which no one and no service has delete access
 exports.handler = async (event, context, callback) => {
-    const metaData = [];
+    const metadata = [];
 
     try {
         // List objects in bucket
         const s3Objects = await s3.listObjectsV2(listParams).promise();
 
-        // Get object keys
         const objectKeys = [];
         s3Objects.Contents.forEach(obj => {
-            objectKeys.push(obj.Key);
+            if (obj.Size < 10000)
+                s3.deleteObject({ Bucket, Key: obj.Key}).promise(); // delete comment posts
+            else
+                objectKeys.push(obj.Key); // Get object keys
         });
 
         // Iterate through each object key
@@ -27,31 +29,22 @@ exports.handler = async (event, context, callback) => {
             // Transform the S3 object
             const stylefree = original.replace(/<style>.*<\/style>/is, '');
 
+            // Populate metadata array
+            const path = key.slice(0, -5);
+            metadata.push({ path }); // push({ path, title, img, subtitle })
+
             // Update S3 with the changes
             await s3.putObject({ Bucket, Key: key, Body: stylefree, ACL: 'public-read' }).promise();
         }
 
+        console.log(metadata);
         callback(null, 'Success!');
     } catch (err) {
         callback(err.message);
     }
 
-    //     if (obj.Size < 10000) {
-    //         console.log(`Deleting ${obj.Key}, with size of ${obj.Size}...`);
-    //         s3.deleteObject(objParams, (err, res) => {
-    //             console.log(err, res);
-    //         });
-    //         return;
-    //     }
-
-    //     const path = obj.Key.slice(0, -5); // remove '.html'
-    //     metaData.push({
-    //         path,
-    //     })
-    // });
-
     // console.log('printing all metadata:')
-    // console.log(metaData);
+    // console.log(metadata);
     // as you iterate through each object,
     // push object meta-data to an array
 
