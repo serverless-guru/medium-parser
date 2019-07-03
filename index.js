@@ -22,6 +22,8 @@ exports.handler = async (event, context, callback) => {
 
         // Iterate through each object key
         for (key of objectKeys) {
+            if (key === "metadata.json") return;
+
             // Get an S3 object
             const article = await s3.getObject({ Bucket, Key: key }).promise();
             const original = article.Body.toString('utf-8');
@@ -50,6 +52,7 @@ exports.handler = async (event, context, callback) => {
         }
 
         console.log(metadata);
+        await s3.putObject({ Bucket, Key: 'metadata.json', Body: JSON.stringify(metadata), ACL: 'public-read' }).promise();
         callback(null, 'Success!');
     } catch (err) {
         callback(err.message);
