@@ -24,8 +24,8 @@ exports.handler = async (event) => {
             if (err)
                 return err;
             // Convert Body from a Buffer to a String
-            const original = data.Body.toString('utf-8').replace(/\n/g, ' '); // Use the encoding necessary
-            const stylefree = original.replace(/<style>.*<\/style>/i, '');
+            const original = data.Body.toString('utf-8'); // Use the encoding necessary
+            const stylefree = original.replace(/<style>.*<\/style>/is, '');
             console.log(stylefree)
             // s3.putObject({ Body: stylefree, Bucket, Key: obj.Key, Tagging: "destyled=true" }, function (err, data) {
             //     if (err) console.log(err, err.stack); // an error occurred
