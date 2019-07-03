@@ -35,7 +35,15 @@ exports.handler = async (event, context, callback) => {
             // Populate metadata array
             const path = key.slice(0, -5);
             const title = original.match(/<h1 class="p-name">.{1,300}<\/h1>/)[0].slice(19, -5);
-            metadata.push({ path, title }); // push({ path, title, img, subtitle })
+            const imgMatch = original.match(/https:\/\/cdn-images-\d\.medium\.com\/.{10,50}\.(jpeg|png|gif)/i);
+            const img = imgMatch ? imgMatch[0] : '';
+            const subtitleMatch = original.match(/graf--subtitle">.{1,500}<\/h/i);
+            // fix the altSubtitleMatch to work for the `Google Cloud Build — Push Docker Images` article
+            const altSubtitleMatch = original.match(/p-summary">.{1,500}<\/section/i);
+            const subtitle = subtitleMatch ? subtitleMatch[0].slice(16, -3) 
+                : altSubtitleMatch ? 
+                    altSubtitleMatch[0].slice(11, -9) : '';
+            metadata.push({ path, title, img, subtitle });
 
             // Update S3 with the changes
             await s3.putObject({ Bucket, Key: key, Body, ACL: 'public-read' }).promise();
