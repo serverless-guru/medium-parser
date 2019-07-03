@@ -57,25 +57,9 @@ exports.handler = async (event, context, callback) => {
     } catch (err) {
         callback(err.message);
     }
-
-    // console.log('printing all metadata:')
-    // console.log(metadata);
-    // as you iterate through each object,
-    // push object meta-data to an array
-
-    // update the Index.js (table of contents object) with the updated meta-data array
 }
 
-// objects in array of meta data:
-// {
-//     path: '2019-06-06_You-Can-Build-a-Bank-With-These-APIs--Not-Those-3536885c69c6',
-//         title: 'You Can Build a Bank With These APIs, Not Those',
-//             img: 'https://cdn-images-1.medium.com/max/800/0*AZb2NkROIhP3k4WI',
-//                 subtitle: 'No mail- order brides, no human hair, and no money service businesses.These rules are part of Braintree’s Acceptable Use Policy.'
-// }
-
-
-
+// Settings to add in the serverless.yml:
 // {
 //     "Version": "2012-10-17",
 //         "Statement": [

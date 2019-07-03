@@ -21,3 +21,21 @@ Lambda that extracts, transforms, and loads Medium articles to S3 for use in our
 - Also look into possibly removing external scripts from the html files.
 - Also remove the H3 duplicate of the H1 header.
 - Apply a CloudWatch cron job to do the necessary tasks daily.
+
+# Format of the metadata.json array:
+```
+[  
+   {  
+      "path":"2018-06-10_Guide--First-Serverless-Project-630b91366505",
+      "title":"Guide: First Serverless Project",
+      "img":"https://cdn-images-1.medium.com/max/800/1*CuALG7dV2rLky1sapJbnUQ.png",
+      "subtitle":"Let’s learn about the Serverless Framework!"
+   },
+   {  
+      "path":"2018-06-10_Serverless---What--why--how--126d60d95323",
+      "title":"Serverless!? What, why, how?",
+      "img":"https://cdn-images-1.medium.com/max/800/1*qKIyMwSWX8SX2VRmVi4JBg.png",
+      "subtitle":"Let’s take a look at something called Serverless."
+   },
+]
+```
