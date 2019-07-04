@@ -31,7 +31,7 @@ exports.handler = async (event, context, callback) => {
             // Customize the S3 object's text based on your needs
             const Body = original
                 .replace(/<style>.*<\/style>/is, '')
-                .replace(/What did we miss.*footer>/is, '')
+                .replace(/<h4.{400,700}on Twitter.<\/p>/, '') // because we don't have a comments box yet
                 .replace(/<h3.{40,400}<\/h4>/i, '') // remove the duplicate title/subtitle pair
                 .replace(/>https.{33}polly.{82}</i, '>Listen to article as Audio by Amazon Polly<');
 
@@ -46,7 +46,9 @@ exports.handler = async (event, context, callback) => {
             const subtitle = subtitleMatch ? subtitleMatch[0].slice(16, -3) 
                 : altSubtitleMatch ? 
                     altSubtitleMatch[0].slice(11, -9) : '';
-            metadata.push({ path, title, img, subtitle });
+            const h3Tags = original.match(/<h3.{1,200}<\/h3>/gis);
+            const author = h3Tags[h3Tags.length - 1].slice(67, -5);
+            metadata.push({ path, title, img, subtitle, author });
 
             // Update S3 with the changes
             await s3.putObject({ Bucket, Key: key, Body, ACL: 'public-read' }).promise();
