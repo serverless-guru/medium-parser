@@ -33,6 +33,10 @@ exports.handler = async (event, context, callback) => {
                 .replace(/<style>.*<\/style>/is, '')
                 .replace(/<h4.{400,700}on Twitter.<\/p>/, '') // because we don't have a comments box yet
                 .replace(/<h3.{40,400}<\/h4>/i, '') // remove the duplicate title/subtitle pair
+                .replace(/<p.{200,350}please follow us.{500,1200}p>.{1,4}div/is, '</div') // remove social links section
+
+                 // {300,600} makes it more specific, thereby lowering the chance of deleting a code example in the article:
+                .replace(/section>.?<footer>.{300,600}footer>/is, 'section>')
                 .replace(/>https.{33}polly.{82}</i, '>Listen to article as Audio by Amazon Polly<');
 
             // Populate metadata array
