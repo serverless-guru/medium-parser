@@ -15,7 +15,7 @@ exports.handler = async (event, context, callback) => {
         const objectKeys = [];
         s3Objects.Contents.forEach(obj => {
             if (obj.Size < 10000)
-                s3.deleteObject({ Bucket, Key: obj.Key}).promise(); // delete comment posts
+                s3.deleteObject({ Bucket, Key: obj.Key }).promise(); // delete comment posts
             else
                 objectKeys.push(obj.Key); // Get object keys
         });
@@ -32,6 +32,7 @@ exports.handler = async (event, context, callback) => {
             const Body = original
                 .replace(/<style>.*<\/style>/is, '')
                 .replace(/What did we miss.*footer>/is, '')
+                .replace(/<h3.{40,400}<\/h4>/i, '') // remove the duplicate title/subtitle pair
                 .replace(/>https.{33}polly.{82}</i, '>Listen to article as Audio by Amazon Polly<');
 
             // Populate metadata array
