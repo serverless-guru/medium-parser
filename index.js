@@ -22,7 +22,7 @@ exports.handler = async (event, context, callback) => {
 
         // Iterate through each object key
         for (key of objectKeys) {
-            if (key === "metadata.json") return;
+            if (key === "metadata.json") continue;
 
             // Get an S3 object
             const article = await s3.getObject({ Bucket, Key: key }).promise();
