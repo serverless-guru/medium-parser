@@ -50,8 +50,8 @@ exports.handler = async (event, context, callback) => {
 
 
             const title = original.match(/<h1 class="p-name">.{1,300}<\/h1>/)[0].slice(19, -5);
-            const imgMatch = original.match(/https:\/\/cdn-images-\d\.medium\.com\/.{10,50}\.(jpeg|png|gif)/i);
-            const img = imgMatch ? imgMatch[0] : '';
+            const imgMatch = original.match(/https:\/\/cdn-images-\d\.medium\.com\/.{10,50}">/i);
+            const img = imgMatch ? imgMatch[0].slice(0,-2) : '';
             const subtitleMatch = original.match(/graf--subtitle">.{1,500}<\/h4/i);
 
             const altSubtitleContent = altSubtitle[0].slice(49, -10);
