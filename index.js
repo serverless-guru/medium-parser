@@ -36,7 +36,7 @@ exports.handler = async (event, context, callback) => {
             const Body = original
                 .replace(/<style>.*<\/style>/is, '')
                 .replace(/<h4.{400,700}on Twitter.<\/p>/, '') // because we don't have a comments box yet
-                .replace(/<section data-field="subtitle".{1,300}<\/section>.?</is, `<!--${altSubtitle}--><`)
+                .replace(/>.?<section data-field="subtitle".{1,300}<\/section>.?</is, `><!--${altSubtitle}--><`)
                 .replace(/<h3.{30,100}graf--title.{5,100}<\/h3>/is, '') // remove duplicate title
                 .replace(/<p.{200,350}please follow us.{500,1200}p>.{1,4}div/is, '</div') // remove social links section
                 .replace(/<figure.{100,300}image.{100,300}serverlessguru.{100,300}<\/figure>/is, '') //remove SG logo
