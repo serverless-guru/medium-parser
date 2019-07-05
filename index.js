@@ -28,32 +28,38 @@ exports.handler = async (event, context, callback) => {
             const article = await s3.getObject({ Bucket, Key: key }).promise();
             const original = article.Body.toString('utf-8');
 
+            // In some articles, this subtitle is the same as the other subtitle, in some it's different
+            // and in some, it's not there. So comment it out. That way you can come back to it if needed.
+            const altSubtitle = original.match(/<section data-field="subtitle".{1,300}<\/section>/is);
+
             // Customize the S3 object's text based on your needs
             const Body = original
                 .replace(/<style>.*<\/style>/is, '')
                 .replace(/<h4.{400,700}on Twitter.<\/p>/, '') // because we don't have a comments box yet
-                .replace(/<h3.{40,400}<\/h4>/i, '') // remove the duplicate title/subtitle pair
+                .replace(/<section data-field="subtitle".{1,300}<\/section>/is, `<!--${altSubtitle}-->`)
+                .replace(/<h3.{50,200}<\/h3>/is, '') // remove duplicate title
                 .replace(/<p.{200,350}please follow us.{500,1200}p>.{1,4}div/is, '</div') // remove social links section
                 .replace(/<figure.{100,300}image.{100,300}serverlessguru.{100,300}<\/figure>/is, '') //remove SG logo
-                
-                 // {300,600} makes it more specific, thereby lowering the chance of deleting a code example in the article:
+
+                // {300,600} makes it more specific, thereby lowering the chance of deleting a code example in the article:
                 .replace(/section>.?<footer>.{300,600}footer>/is, 'section>')
                 .replace(/>https.{33}polly.{82}</i, '>Listen to article as Audio by Amazon Polly<');
 
-        // Populate metadata array
-        const path = key.slice(0, -5);
+            // Populate metadata array
+            const path = key.slice(0, -5);
+
+
             const title = original.match(/<h1 class="p-name">.{1,300}<\/h1>/)[0].slice(19, -5);
             const imgMatch = original.match(/https:\/\/cdn-images-\d\.medium\.com\/.{10,50}\.(jpeg|png|gif)/i);
             const img = imgMatch ? imgMatch[0] : '';
-            const subtitleMatch = original.match(/graf--subtitle">.{1,500}<\/h/i);
+            const subtitleMatch = original.match(/graf--subtitle">.{1,500}<\/h4/i);
+
             // fix the altSubtitleMatch to work for the `Google Cloud Build — Push Docker Images` article
-            const altSubtitleMatch = original.match(/p-summary">.{1,500}<\/section/i);
-            const subtitle = subtitleMatch ? subtitleMatch[0].slice(16, -3) 
-                : altSubtitleMatch ? 
-                    altSubtitleMatch[0].slice(11, -9) : '';
+            const subtitle = subtitleMatch ? subtitleMatch[0].slice(16, -4) : '';
             const h3Tags = original.match(/<h3.{1,200}<\/h3>/gis);
             const author = h3Tags[h3Tags.length - 1].slice(67, -5);
             metadata.push({ path, title, img, subtitle, author });
+
 
             // Update S3 with the changes
             await s3.putObject({ Bucket, Key: key, Body, ACL: 'public-read' }).promise();
