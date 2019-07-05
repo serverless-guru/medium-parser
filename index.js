@@ -68,7 +68,8 @@ exports.handler = async (event, context, callback) => {
                 subtitle = '';
             const h3Tags = original.match(/<h3.{1,200}<\/h3>/gis);
             const author = h3Tags[h3Tags.length - 1].slice(67, -5);
-            metadata.push({ path, title, img, subtitle, author });
+            const date = path.slice(0, 10);
+            metadata.push({ path, title, img, subtitle, author, date });
 
 
             // Update S3 with the changes
