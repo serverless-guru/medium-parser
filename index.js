@@ -36,8 +36,8 @@ exports.handler = async (event, context, callback) => {
             const Body = original
                 .replace(/<style>.*<\/style>/is, '')
                 .replace(/<h4.{400,700}on Twitter.<\/p>/, '') // because we don't have a comments box yet
-                .replace(/<section data-field="subtitle".{1,300}<\/section>/is, `<!--${altSubtitle}-->`)
-                .replace(/<h3.{50,200}<\/h3>/is, '') // remove duplicate title
+                .replace(/<section data-field="subtitle".{1,300}<\/section>.?</is, `<!--${altSubtitle}--><`)
+                .replace(/<h3.{30,100}graf--title.{5,100}<\/h3>/is, '') // remove duplicate title
                 .replace(/<p.{200,350}please follow us.{500,1200}p>.{1,4}div/is, '</div') // remove social links section
                 .replace(/<figure.{100,300}image.{100,300}serverlessguru.{100,300}<\/figure>/is, '') //remove SG logo
 
@@ -54,8 +54,18 @@ exports.handler = async (event, context, callback) => {
             const img = imgMatch ? imgMatch[0] : '';
             const subtitleMatch = original.match(/graf--subtitle">.{1,500}<\/h4/i);
 
+            const altSubtitleContent = altSubtitle[0].slice(49, -10);
+
             // fix the altSubtitleMatch to work for the `Google Cloud Build — Push Docker Images` article
-            const subtitle = subtitleMatch ? subtitleMatch[0].slice(16, -4) : '';
+            let subtitle;
+            if (subtitleMatch)
+                subtitle = subtitleMatch[0].slice(16, -4);
+            else if (!altSubtitleContent)
+                subtitle = '';
+            else if (altSubtitleContent.length > 10)
+                subtitle = altSubtitleContent;
+            else 
+                subtitle = '';
             const h3Tags = original.match(/<h3.{1,200}<\/h3>/gis);
             const author = h3Tags[h3Tags.length - 1].slice(67, -5);
             metadata.push({ path, title, img, subtitle, author });
