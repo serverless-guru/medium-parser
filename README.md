@@ -39,3 +39,8 @@ Lambda that extracts, transforms, and loads Medium articles to S3 for use in our
    },
 ]
 ```
+
+# Future improvements:
+- Refactor/optimize the Lambda function
+- Perhaps use Python insead, and use something like Beautiful Soup
+- Optimize the serverless deployment so that the first step that happens when running `sls deploy` is checking whether the s3 bucket name chosen is available.
