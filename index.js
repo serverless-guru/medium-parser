@@ -1,10 +1,8 @@
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
-const Bucket = 'medium-html';
+const Bucket = process.env.S3_BUCKET;
 const listParams = { Bucket };
 
-// this Lambda has full permissions for S3's medium-html (specify that in serverless.yml)
-// also backup daily to another bukect to which no one and no service has delete access
 exports.handler = async (event, context, callback) => {
     const metadata = [];
 
@@ -84,34 +82,3 @@ exports.handler = async (event, context, callback) => {
         callback(err.message);
     }
 }
-
-// Settings to add in the serverless.yml:
-// {
-//     "Version": "2012-10-17",
-//         "Statement": [
-//             {
-//                 "Sid": "VisualEditor0",
-//                 "Effect": "Allow",
-//                 "Action": "s3:DeleteObject",
-//                 "Resource": "arn:aws:s3:::medium-html/*"
-//             }
-//         ]
-// }
-
-// set lambda timeout to 1 minute
-
-// {
-//     "Version": "2012-10-17",
-//         "Statement": [
-//             {
-//                 "Sid": "VisualEditor0",
-//                 "Effect": "Allow",
-//                 "Action": [
-//                     "s3:PutObject",
-//                     "s3:PutObjectTagging",
-//                     "s3:PutObjectAcl"
-//                 ],
-//                 "Resource": "arn:aws:s3:::medium-html/*"
-//             }
-//         ]
-// }
