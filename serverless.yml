@@ -1,0 +1,42 @@
+service: medium-parser
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  region: us-west-2
+
+  iamRoleStatements:
+   - Effect: "Allow"
+     Action:
+       - "s3:DeleteObject"
+     Resource: "arn:aws:s3:::${self:custom.s3bucketname}/*"
+   - Effect: "Allow"
+     Action:
+       - "s3:PutObject"
+       - "s3:GetObject"
+       - "s3:PutObjectTagging"
+       - "s3:PutObjectAcl"
+     Resource: 
+       - "arn:aws:s3:::${self:custom.s3bucketname}"
+       - "arn:aws:s3:::${self:custom.s3bucketname}/*"
+
+custom:
+  # Customize this:
+  s3bucketname: medium-html-test
+
+functions:
+  medium-parser:
+    handler: index.handler
+    environment:
+      S3_BUCKET: ${self:custom.s3bucketname}
+
+resources:
+ Resources:
+   ArticleBucket:
+     Type: AWS::S3::Bucket
+     Properties:
+       BucketName: ${self:custom.s3bucketname}
+#  Outputs:
+#     NewOutput:
+#       Description: "Description for the output"
+#       Value: "Some output value"
